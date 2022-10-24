@@ -39,9 +39,16 @@ public class Player {
 
     public void movePlayer(int diceRoll){
         this.boardLocation += diceRoll;
-        if(this.boardLocation >= 39){
+        if(this.boardLocation > 39){
             this.boardLocation = this.boardLocation - 40;
             this.cash += 200;}
     }
 
+    public void addCash(int cash) {
+        this.cash += cash;
+    }
+
+    public void removeCash(int cash) {
+        this.cash -= cash;
+    }
 }
