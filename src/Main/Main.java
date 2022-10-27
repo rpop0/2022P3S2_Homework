@@ -1,26 +1,20 @@
-package Main;
-
+package Monopoly;
 
 public class Main {
-    public static void main(String[] args) {
-        String[] layout = {"Start",".","Community Chest",".","Income tax",".",".","Chance",".",".","Prison",".",".",".",".",".",".","Community Chest",".",".",".",".","Chance",".",".",".",".",".",".",".","Go to prison",".",".","Community Chest",".",".","Chance",".","Super tax","."};
+
+    public static void main(String []args)
+    {
         InputDevice id = new InputDevice();
         OutputDevice od = new OutputDevice();
-        Application monopoly = new Application(id,od);
-        Board board = new Board(layout);
 
-        int numberOfPlayers = Integer.parseInt(args[0]);
-        int numberOfRounds = Integer.parseInt(args[1]);
+        Application game = new Application(id, od);
 
-        Player players[] = monopoly.getPlayers(numberOfPlayers);
-        monopoly.playGame(numberOfRounds,numberOfPlayers,players);
-        monopoly.decideWinner(numberOfPlayers,players);
+        int noOfPlayers = Integer.parseInt(args[0]);
+        int noOfRounds = Integer.parseInt(args[1]);
 
-
-
-
-
-
+        Player []players = game.getPlayers(noOfPlayers);
+        game.playGame(noOfRounds, noOfPlayers, players);
+        game.decideWinner(noOfPlayers, players);
 
     }
 }
