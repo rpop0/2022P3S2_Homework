@@ -1,4 +1,4 @@
-package Monopoly;
+package Main;
 
 public class OutputDevice {
     
