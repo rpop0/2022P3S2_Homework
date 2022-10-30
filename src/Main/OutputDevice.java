@@ -1,11 +1,14 @@
 package Main;
 
 public class OutputDevice {
-    public void writeMessage(String mess){
-        System.out.println(mess);
+    
+    public OutputDevice()
+    {
 
     }
-    public void writeMessage(int mess){
+
+    public void writeMessage(String mess)
+    {
         System.out.println(mess);
     }
 }
