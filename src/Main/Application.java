@@ -1,13 +1,57 @@
 package Main;
 
+import Main.Actions.Action;
+import Main.Actions.MoveAction;
+import Main.IO.InputDevice;
+import Main.IO.OutputDevice;
+import Main.Squares.Square;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.Random;
+
+import static java.lang.System.exit;
 
 public class Application {
     InputDevice id;
     OutputDevice od;
-    Square []board = new Board().getBoard();
+    Square[]board = new Board().getBoard();
+    static Player[] players;
+
+    public void Save()
+    {
+        try(ObjectOutputStream fos = new ObjectOutputStream(new FileOutputStream("SaveFile.txt")))
+        {
+            for(Player current : players)
+            {
+                fos.writeObject(current);
+            }
+
+            for (Square i : Board.getBoard())
+                fos.writeObject(i);
+
+        }catch(FileNotFoundException e){System.out.println("Error creating savefile."); exit(-2);}
+        catch(IOException e) {System.out.println("Error writing to savefile."); exit(-2);}
+    }
+
+    public Player[] Load(int noOfPlayers)
+    {
+        try (ObjectInputStream ios = new ObjectInputStream(new FileInputStream("SaveFile.txt")))
+        {
+            players = new Player[noOfPlayers];
+            for (int i = 0; i < noOfPlayers; i++)
+            {
+                players[i] = (Player)ios.readObject();
+            }
+            for (int i = 0; i < 40; i++)
+                board[i] = (Square)ios.readObject();
+        }catch(FileNotFoundException e){System.out.println("Savefile not found, please start a new game."); exit(-1);}
+        catch(IOException e){System.out.println("Savefile may be corrupted or access isn't authorized, please start a new game."); exit(-1);}
+        catch(ClassNotFoundException e){e.printStackTrace();}
+
+
+        return players;
+    }
 
     public Application(InputDevice _id, OutputDevice _od)
     {
@@ -72,15 +116,17 @@ public class Application {
         }
     }
 
-    public Player[] getPlayers(int noOfPlayers)
+    public Player[] createPlayers(int noOfPlayers)
     {
-        Player []players = new Player[noOfPlayers];
+        players = new Player[noOfPlayers];
         for (int i = 0; i < noOfPlayers; i++)
         {
             players[i] = new Player();
         }
         return players;
     }
+
+    public static Player[] getPlayers(){return players;}
 
     public void decideWinner(int noOfPlayers, Player []players)
     {
@@ -98,7 +144,7 @@ public class Application {
 
         for (int i = 0; i < PlayersCash.length; i++)
         {
-            if (PlayersCash[i] > max)
+            if (PlayersCash[i] > max && !players[i].isBankrupt())
             {
                 maxPos = i;
                 max = PlayersCash[i];
@@ -135,6 +181,7 @@ public class Application {
         {
             od.writeMessage(drawText + " between players: " + players[maxPos].getName() + " and " + players[drawPos].getName() + ", both with: " + players[maxPos].getCash() + "$.");
         }
+        Save();
     }
 
     public void playGame(int noOfRounds, int noOfPlayers, Player []players)
@@ -143,31 +190,24 @@ public class Application {
         {
             for (int j = 0; j < noOfPlayers; j++)
             {
-                int roll = players[j].rollDice();
-                players[j].movePlayer(roll);
-                if (board[players[j].getLocation()] instanceof Property )
+                if(players[j].getTimeOut()!=0 && !players[j].isBankrupt())
                 {
-                    if ( ((Property) board[players[j].getLocation()]).checkIfOwned() )
-                    {
-                        for (int x = 0; x < players.length; x++)
-                        {
-                            if ( ((Property) board[players[j].getLocation()]).getOwner() == players[x].getName() && players[j].getName() != players[x].getName())
-                            {
-                                Random n = new Random();
-                                int money = n.nextInt(101);
-                                players[j].payToPlayer(money, players[x]);
-                                System.out.println(players[j].getName() + " has payed " + money + " to " + players[x].getName() + "\n");
-                            }
-                        }
-                    }
+                    players[j].setTimeOut(players[j].getTimeOut()-1);
+                    if(players[j].getTimeOut()>0)
+                        od.writeMessage("Player " + players[j].getName() + " is in Jail for " + players[j].getTimeOut() + " more turns!\n");
                     else
-                    {
-                        ( (Property) board[players[j].getLocation()]).buyProperty(players[j]);
+                        od.writeMessage("Player " + players[j].getName() + " has left Jail!\n");
+                }
+                else
+                {
+                    int roll = players[j].rollDice();
+                    Action act = new MoveAction(players[j], roll);
+                    while (act != null) {
+                        act = act.apply();
                     }
                 }
             }
         }
     }
-
 
 }
