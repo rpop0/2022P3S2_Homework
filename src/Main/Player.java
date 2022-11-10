@@ -1,9 +1,15 @@
 package Main;
 
+import Main.IO.OutputDevice;
+import Main.Squares.Property;
+import Main.Squares.Square;
+
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Player {
+public class Player implements Serializable {
 
     private String _name;
     private String _color;
@@ -11,6 +17,31 @@ public class Player {
     private int _cash;
     private int _propertyVal;
     private int _totalwealth;
+    private int timeOut;
+    private boolean bankrupt;
+
+    public String getAllData()
+    {
+        String data = _name+" "+_color+" "+_locationOnBoard+" "+_cash+" "+_propertyVal+" "+_totalwealth+" "+timeOut+ " " + bankrupt +"\n";
+        for (Square i : Board.getBoard())
+            if (i instanceof Property)
+                if (Objects.equals(((Property) i).getOwnerName(), this._name))
+                    data = data.concat(i.getName() + " ");
+        return data;
+    }
+
+    public Player(String data)
+    {
+        String[] dataParts = data.split(" ");
+        _name = dataParts[0];
+        _color = dataParts[1];
+        _locationOnBoard = Integer.parseInt(dataParts[2]);
+        _cash = Integer.parseInt(dataParts[3]);
+        _propertyVal = Integer.parseInt(dataParts[4]);
+        _totalwealth = Integer.parseInt(dataParts[5]);
+        timeOut = Integer.parseInt(dataParts[6]);
+        bankrupt = Boolean.parseBoolean(dataParts[7]);
+    }
 
     public Player()
     {
@@ -26,6 +57,7 @@ public class Player {
         this._color = color;
         this._cash = 0;
         this._locationOnBoard = 0;
+        this.timeOut = 0;
     }
 
     public int rollDice()
@@ -71,33 +103,11 @@ public class Player {
         return this._name;
     }
 
-    public void movePlayer(int diceRoll)
-    {
-        this._locationOnBoard += diceRoll;
-        if (this._locationOnBoard > 39)
-        {
-            this._locationOnBoard = this._locationOnBoard - 40;
-            this._cash += 200;
-        }
-        System.out.println(this._name + " new position is: " + this._locationOnBoard + "\n");
-    }
-
-    public void pay(int money)
-    {
-        this._cash -= money;
-        this._propertyVal += money;
-    }
-
     public void receiveMoney(int money)
     {
         this._cash += money;
     }
-    
-    public void payToPlayer(int money, Player player)
-    {
-        this._cash -= money;
-        player.receiveMoney(money);
-    }
+
 
     public int getTotalWealth()
     {
@@ -108,5 +118,29 @@ public class Player {
     public int getPropertyVal()
     {
         return this._propertyVal;
+    }
+
+    public void set_locationOnBoard(int _locationOnBoard) {
+        this._locationOnBoard = _locationOnBoard;
+    }
+
+    public void set_cash(int _cash) {
+        this._cash = _cash;
+    }
+
+    public int getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+    }
+
+    public boolean isBankrupt(){return this.bankrupt;}
+
+    public void setBankruptcy(){this.bankrupt = true;}
+
+    public void add_propertyVal(int _propertyVal) {
+        this._propertyVal += _propertyVal;
     }
 }
